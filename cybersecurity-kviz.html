@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kybernetická bezpečnosť — Kvíz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(99,210,255,0.35);
+    --accent: #63d2ff;
+    --accent-dim: rgba(99,210,255,0.12);
+    --accent-glow: rgba(99,210,255,0.25);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.12);
+    --text: #e8edf5;
+    --text-muted: #6b7a99;
+    --text-dim: #9aa5be;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-x: hidden;
+  }
+
+  /* grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99,210,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,210,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-tag::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+  .header h1 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .header h1 span { color: var(--accent); }
+  .header-sub {
+    margin-top: 0.6rem;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .stat {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    margin-bottom: 1.75rem;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #a78bfa);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .topic-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(99,210,255,0.2);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 1.25rem;
+  }
+  .topic-pill svg { width: 12px; height: 12px; }
+
+  .question-text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .opt {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    text-align: left;
+    color: var(--text-dim);
+    font-family: var(--sans);
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+  .opt-letter {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border-radius: 5px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .opt:hover:not(:disabled) {
+    border-color: var(--border-hover);
+    background: var(--accent-dim);
+    color: var(--text);
+    transform: translateX(4px);
+  }
+  .opt:hover:not(:disabled) .opt-letter {
+    background: var(--accent);
+    color: #0a0e1a;
+  }
+  .opt.correct {
+    border-color: var(--green);
+    background: var(--green-dim);
+    color: var(--green);
+  }
+  .opt.correct .opt-letter { background: var(--green); color: #0a0e1a; }
+  .opt.wrong {
+    border-color: var(--red);
+    background: var(--red-dim);
+    color: var(--red);
+  }
+  .opt.wrong .opt-letter { background: var(--red); color: #0a0e1a; }
+  .opt.reveal {
+    border-color: rgba(74,222,128,0.3);
+    background: rgba(74,222,128,0.05);
+    color: var(--green);
+    opacity: 0.6;
+  }
+  .opt.reveal .opt-letter { background: var(--green); color: #0a0e1a; }
+  .opt:disabled { cursor: default; transform: none !important; }
+
+  /* Explanation */
+  .explanation {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.1rem;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.65;
+    display: none;
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.3s ease both;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: var(--accent); font-weight: 500; }
+
+  .btn-next {
+    background: var(--accent);
+    color: #0a0e1a;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-next:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Score */
+  .score-screen {
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+  .score-screen.show { display: block; }
+  .score-circle {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 0 40px var(--accent-glow);
+  }
+  .score-num {
+    font-family: var(--mono);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-total {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .score-pct {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.03em;
+  }
+  .score-msg {
+    text-align: center;
+    font-size: 15px;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .res-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+  }
+  .res-topic {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .res-status {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .res-status.ok { color: var(--green); }
+  .res-status.fail { color: var(--red); }
+
+  .btn-restart {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-restart:hover { background: var(--accent-dim); transform: translateY(-1px); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 520px) {
+    .card { padding: 1.25rem; }
+    .results-grid { grid-template-columns: 1fr; }
+    .stats-bar { gap: 0.5rem; }
+    .stat { padding: 0.6rem 0.5rem; }
+    .stat-val { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-tag">SPSEKE &mdash; Informatika</div>
+    <h1>Kybernetická<br><span>bezpečnosť</span></h1>
+    <p class="header-sub">Interaktívny kvíz &mdash; 12 otázok z témy ochrany dát a sietí</p>
+  </div>
+
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat">
+      <div class="stat-val" id="stat-score">0</div>
+      <div class="stat-label">Správne</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-wrong">0</div>
+      <div class="stat-label">Nesprávne</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-remain">12</div>
+      <div class="stat-label">Zostatok</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-meta">
+      <span id="prog-label">Otázka 1 z 12</span>
+      <span id="prog-pct">0 %</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="card" id="quiz-card">
+    <div class="topic-pill" id="topic-pill">
+      <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3"/></svg>
+      <span id="topic-text"></span>
+    </div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="opts"></div>
+    <div class="explanation" id="explanation"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQ()">Ďalšia otázka →</button>
+  </div>
+
+  <div class="score-screen" id="score-screen">
+    <div class="card">
+      <div class="score-circle">
+        <div class="score-num" id="sc-num">0</div>
+        <div class="score-total" id="sc-total">/12</div>
+      </div>
+      <div class="score-pct" id="sc-pct"></div>
+      <div class="score-msg" id="sc-msg"></div>
+      <div class="results-grid" id="results-grid"></div>
+      <button class="btn-restart" onclick="restart()">↺ Skúsiť znova</button>
+    </div>
+  </div>
+
+  <div class="footer">SPSEKE &mdash; Predmet: Kybernetická bezpečnosť &mdash; 2025/2026</div>
+</div>
+
+<script>
+const Q = [
+  {topic:"Zálohovanie",q:"Čo znamená zálohovanie dát podľa princípu 3-2-1?",opts:["3 zálohy, 2 médiá, 1 mimo lokality","3 médiá, 2 zálohy, 1 cloud","3 zálohy, 2 cloudy, 1 lokálna kópia","3 servery, 2 zálohy, 1 archív"],ans:0,exp:"Pravidlo <strong>3-2-1</strong>: uchovaj 3 kópie dát, na 2 rôznych typoch médií, pričom 1 kópia musí byť uložená mimo hlavnej lokality (off-site). Chráni pred požiarom, krádežou aj hardvérovým zlyhaním."},
+  {topic:"RAID",q:"Ktorý RAID level poskytuje zrkadlenie dát (mirroring) bez stripovania?",opts:["RAID 0","RAID 1","RAID 5","RAID 6"],ans:1,exp:"<strong>RAID 1</strong> vytvára presnú kópiu (zrkadlo) dát na dvoch alebo viacerých diskoch. Ak jeden disk zlyhá, dáta sú stále dostupné z druhého. Nevýhoda: kapacita sa delí na polovicu."},
+  {topic:"RAID",q:"Ktorý RAID level NEPOSKYTUJE žiadnu redundanciu a pri zlyhaní jedného disku sú dáta stratené?",opts:["RAID 0","RAID 1","RAID 5","RAID 10"],ans:0,exp:"<strong>RAID 0</strong> (striping) rozdeľuje dáta medzi disky pre vyšší výkon, ale bez akejkoľvek redundancie. Zlyhanie jedného disku = strata všetkých dát."},
+  {topic:"Šifrovanie",q:"Aký je hlavný rozdiel medzi symetrickým a asymetrickým šifrovaním?",opts:["Symetrické je pomalšie","Symetrické používa rovnaký kľúč na šifrovanie aj dešifrovanie","Asymetrické používa jeden kľúč pre všetkých","Symetrické šifrovanie neexistuje v praxi"],ans:1,exp:"Pri <strong>symetrickom šifrovaní</strong> sa ten istý tajný kľúč používa na šifrovanie aj dešifrovanie. Asymetrické šifrovanie používa dvojicu kľúčov – verejný a súkromný."},
+  {topic:"Šifrovanie",q:"Na čo slúži verejný kľúč v asymetrickej kryptografii?",opts:["Na dešifrovanie správ","Na šifrovanie správ odosielaných príjemcovi","Na generovanie nových kľúčov","Na uloženie hesla"],ans:1,exp:"<strong>Verejný kľúč</strong> zdieľaš s ostatnými – môžu ním šifrovať správy určené tebe. Dešifrovať ich môžeš len ty pomocou svojho <strong>súkromného kľúča</strong>."},
+  {topic:"Elektronický podpis",q:"Na čo slúži elektronický podpis?",opts:["Na šifrovanie e-mailu pred odoslaním","Na overenie identity odosielateľa a integrity dokumentu","Na zálohovanie digitálnych dokumentov","Na prístup k vládnym databázam"],ans:1,exp:"<strong>Elektronický podpis</strong> overuje totožnosť podpisovateľa a zaručuje, že dokument nebol po podpísaní zmenený. Na Slovensku má právnu silu rovnakú ako vlastnoručný podpis."},
+  {topic:"VPN",q:"Čo je VPN?",opts:["Vírus pre počítačové siete","Virtuálna privátna sieť vytvárajúca šifrovaný tunel","Typ firewallu","Protokol na prenos súborov"],ans:1,exp:"<strong>VPN</strong> (Virtual Private Network) vytvára šifrovaný tunel medzi tvojím zariadením a VPN serverom, čím chráni tvoje dáta pred odpočúvaním a skrýva tvoju IP adresu."},
+  {topic:"Sieťová bezpečnosť",q:"Čo je honeypot v kontexte kybernetickej bezpečnosti?",opts:["Záložný server pre dáta","Nástroj na hashovanie hesiel","Falošný systém slúžiaci na lákanie a sledovanie útočníkov","Šifrovací algoritmus"],ans:2,exp:"<strong>Honeypot</strong> je úmyselne zraniteľný systém navrhnutý tak, aby lákal útočníkov. Umožňuje bezpečnostným tímom sledovať ich metódy a chrániť skutočnú infraštruktúru."},
+  {topic:"Prístup k dátam",q:"Čo meria entropia hesla?",opts:["Dĺžku hesla v bytoch","Mieru nepredvídateľnosti a silu hesla","Rýchlosť šifrovania hesla","Počet znakov v hesle"],ans:1,exp:"<strong>Entropia hesla</strong> (meraná v bitoch) vyjadruje, ako ťažké je uhádnuť heslo. Závisí od veľkosti množiny znakov a dĺžky hesla. Vyššia entropia = silnejšie heslo."},
+  {topic:"Biometria",q:"Čo je biometria ako metóda autentifikácie?",opts:["Použitie dlhého hesla","Overenie identity pomocou fyzických alebo behaviorálnych charakteristík","Šifrovanie pomocou biočipu","Zálohovanie dát do cloudu"],ans:1,exp:"<strong>Biometria</strong> využíva jedinečné fyzické (odtlačok prsta, sken sietnice, rozpoznanie tváre) alebo behaviorálne vlastnosti osoby na overenie jej identity."},
+  {topic:"HTTPS",q:"Čo skratka HTTPS v adrese webu signalizuje?",opts:["Stránka je zadarmo","Spojenie medzi klientom a serverom je šifrované","Stránka je hostovaná v SR","Ide o vládnu webstránku"],ans:1,exp:"<strong>HTTPS</strong> (HyperText Transfer Protocol Secure) znamená, že komunikácia medzi prehliadačom a serverom je šifrovaná pomocou <strong>TLS/SSL</strong>, čo chráni prenášané dáta pred odpočúvaním."},
+  {topic:"IDS / IPS",q:"Čo je IDS/IPS systém?",opts:["Internetový DNS server","Systém na detekciu a prevenciu prienikov do siete","Zálohovací softvér","Typ šifrovacieho protokolu"],ans:1,exp:"<strong>IDS</strong> (Intrusion Detection System) monitoruje premávku a upozorňuje na podozrivú aktivitu. <strong>IPS</strong> (Intrusion Prevention System) navyše aktívne blokuje hrozby v reálnom čase."},
+];
+
+const LETTERS = ['A','B','C','D'];
+let cur = 0, score = 0, wrong = 0, answered = false, results = [];
+
+function render() {
+  const q = Q[cur];
+  const pct = Math.round(cur/Q.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = `Otázka ${cur+1} z ${Q.length}`;
+  document.getElementById('prog-pct').textContent = pct+' %';
+  document.getElementById('topic-text').textContent = q.topic;
+  document.getElementById('q-text').textContent = q.q;
+
+  const opts = document.getElementById('opts');
+  opts.innerHTML = '';
+  q.opts.forEach((o,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span>${o}`;
+    b.onclick = () => select(i);
+    opts.appendChild(b);
+  });
+
+  document.getElementById('explanation').className = 'explanation';
+  document.getElementById('btn-next').style.display = 'none';
+  answered = false;
+
+  // Animate card
+  const card = document.getElementById('quiz-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeUp 0.4s ease both';
+}
+
+function select(i) {
+  if(answered) return;
+  answered = true;
+  const q = Q[cur];
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach((b,idx) => {
+    b.disabled = true;
+    if(idx === q.ans) b.className = 'opt correct';
+    else if(idx === i) b.className = 'opt wrong';
+  });
+
+  const correct = i === q.ans;
+  if(correct) score++; else wrong++;
+  results.push({topic: q.topic, correct});
+
+  updateStats();
+
+  const exp = document.getElementById('explanation');
+  exp.innerHTML = q.exp;
+  exp.className = 'explanation show';
+
+  const btn = document.getElementById('btn-next');
+  btn.style.display = 'inline-block';
+  btn.textContent = cur < Q.length-1 ? 'Ďalšia otázka →' : 'Zobraziť výsledok →';
+}
+
+function updateStats() {
+  document.getElementById('stat-score').textContent = score;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-remain').textContent = Q.length - cur - 1;
+}
+
+function nextQ() {
+  cur++;
+  if(cur >= Q.length) showScore();
+  else render();
+}
+
+function showScore() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+
+  const pct = Math.round(score/Q.length*100);
+  document.getElementById('sc-num').textContent = score;
+  document.getElementById('sc-total').textContent = '/'+Q.length;
+  document.getElementById('sc-pct').textContent = pct+' %';
+
+  let msg = '';
+  if(pct>=90) msg = '🎓 Výborný výsledok! Skutočný expert na kybernetickú bezpečnosť.';
+  else if(pct>=70) msg = '👍 Dobrá práca! Solídny prehľad, ešte trochu doladiť.';
+  else if(pct>=50) msg = '📚 Slušný základ. Niektoré témy stojí za zopakovanie.';
+  else msg = '💡 Odporúčame zopakovať materiály z kurzu.';
+  document.getElementById('sc-msg').textContent = msg;
+
+  const grid = document.getElementById('results-grid');
+  grid.innerHTML = results.map(r =>
+    `<div class="res-item"><div class="res-topic">${r.topic}</div><div class="res-status ${r.correct?'ok':'fail'}">${r.correct?'✓ Správne':'✗ Nesprávne'}</div></div>`
+  ).join('');
+
+  document.getElementById('score-screen').className = 'score-screen show';
+}
+
+function restart() {
+  cur=0; score=0; wrong=0; answered=false; results=[];
+  document.getElementById('stat-score').textContent='0';
+  document.getElementById('stat-wrong').textContent='0';
+  document.getElementById('stat-remain').textContent=Q.length;
+  document.getElementById('score-screen').className='score-screen';
+  document.getElementById('quiz-card').style.display='';
+  document.getElementById('progress-wrap').style.display='';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
